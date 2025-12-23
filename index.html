@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>지구를 지켜라 환경 퀴즈</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Jua', sans-serif;
+      background: linear-gradient(#b7e4c7, #90dbf4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      width: 92%;
+      max-width: 540px;
+      padding: 32px 24px;
+      border-radius: 24px;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 44px;
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-size: 30px;
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+
+    p {
+      font-size: 22px;
+      line-height: 1.5;
+    }
+
+    .earth {
+      font-size: 96px;
+      margin: 18px 0 10px;
+    }
+
+    button {
+      margin-top: 26px;
+      padding: 16px 32px;
+      font-size: 22px;
+      border: none;
+      border-radius: 18px;
+      background: #2d6a4f;
+      color: white;
+      cursor: pointer;
+    }
+
+    .option {
+      background: #edf6f9;
+      border-radius: 18px;
+      padding: 18px;
+      margin: 14px 0;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    input[type="text"] {
+      width: 90%;
+      padding: 16px;
+      font-size: 22px;
+      border-radius: 16px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+
+    .result {
+      font-size: 36px;
+      font-weight: bold;
+      padding: 44px 20px;
+      border-radius: 22px;
+      margin-bottom: 22px;
+    }
+
+    .correct {
+      background: #95d5b2;
+      color: #1b4332;
+    }
+
+    .wrong {
+      background: #ffadad;
+      color: #6a040f;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box" id="app"></div>
+
+<script>
+const app = document.getElementById("app");
+
+const questions = [
+  { type:"mc", q:"전기 흡혈귀라고 불리는 것은?", options:["예비전력","낭비전력","손실전력","대기전력"], answer:"대기전력" },
+  { type:"mc", q:"에너지 절약을 위해 권장되는 적정 온도는?", options:["18~20도","20~22도","26~28도","30~32도"], answer:"26~28도" },
+  { type:"mc", q:"화석연료가 아닌 것은?", options:["연료전지","천연가스","석유","석탄 가스화 액화"], answer:"연료전지" },
+  { type:"mc", q:"우리나라에서 전기를 생산하기 위해 가장 많이 사용되는 에너지원은?", options:["원자력","석유","석탄","풍력 발전"], answer:"석유" },
+  { type:"mc", q:"재생에너지가 아닌 것은?", options:["태양광","풍력","원자력","수력"], answer:"원자력" },
+  { type:"text", q:"외부로부터 에너지를 공급받지 않고 자체적으로 에너지를 생산하며 냉 난방 등 에너지 사용을 최소화하는 친환경 건축물을 일컫는 말은? (주관식)", answer:"제로하우스" },
+  { type:"mc", q:"다음 중 해양 에너지가 아닌 것은?", options:["지열에너지","조류에너지","조력에너지","파력에너지"], answer:"지열에너지" },
+  { type:"mc", q:"업사이클링의 우리말은?", options:["재활용","아나바다","신활용","새활용"], answer:"새활용" }
+];
+
+let selected = [];
+let current = 0;
+let score = 0;
+let lastCorrect = "";
+
+function showStart() {
+  app.innerHTML = `
+    <h1>지구를 지켜라</h1>
+    <h2>환경 퀴즈</h2>
+    <div class="earth">🌍</div>
+    <p>퀴즈로 배우는<br>친환경 생활 습관</p>
+    <button onclick="startQuiz()">시작하기</button>
+  `;
+}
+
+function startQuiz() {
+  selected = questions.sort(() => 0.5 - Math.random()).slice(0,5);
+  current = 0;
+  score = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = selected[current];
+  app.innerHTML = `<h2>${current+1} / 5<br>${q.q}</h2>`;
+
+  if (q.type === "mc") {
+    q.options.forEach(opt => {
+      const d = document.createElement("div");
+      d.className = "option";
+      d.innerText = opt;
+      d.onclick = () => checkAnswer(opt);
+      app.appendChild(d);
+    });
+  } else {
+    app.innerHTML += `
+      <input type="text" id="textAnswer" placeholder="정답 입력">
+      <button onclick="submitText()">제출</button>
+    `;
+  }
+}
+
+function checkAnswer(ans) {
+  lastCorrect = selected[current].answer;
+  if (ans === lastCorrect) score++;
+  showResult(ans === lastCorrect);
+}
+
+function submitText() {
+  const user = document.getElementById("textAnswer").value.trim();
+  lastCorrect = selected[current].answer;
+  if (user === lastCorrect) score++;
+  showResult(user === lastCorrect);
+}
+
+function showResult(ok) {
+  app.innerHTML = `
+    <div class="result ${ok ? "correct" : "wrong"}">
+      ${ok ? "정답 🌱" : "오답 ❌<br>정답: " + lastCorrect}
+    </div>
+    <button onclick="next()">다음 문제</button>
+  `;
+}
+
+function next() {
+  current++;
+  if (current < selected.length) {
+    showQuestion();
+  } else {
+    app.innerHTML = `
+      <h2>퀴즈 종료 🌍</h2>
+      <p>5문제 중<br><strong>${score}문제</strong> 맞혔어요</p>
+      <button onclick="showStart()">다시 하기</button>
+    `;
+  }
+}
+
+showStart();
+</script>
+
+</body>
+</html>
